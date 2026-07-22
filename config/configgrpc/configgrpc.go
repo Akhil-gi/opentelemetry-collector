@@ -398,7 +398,7 @@ func (cc *ClientConfig) getGrpcDialOptions(
 	if tlsCfg != nil {
 		cred = credentials.NewTLS(tlsCfg)
 	} else if cc.isSchemeHTTPS() {
-		cred = credentials.NewTLS(&tls.Config{})
+		cred = credentials.NewTLS(&tls.Config{MinVersion: tls.VersionTLS13})
 	}
 	opts = append(opts, grpc.WithTransportCredentials(cred))
 
