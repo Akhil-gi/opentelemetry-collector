@@ -5,6 +5,7 @@ package otlpreceiver // import "go.opentelemetry.io/collector/receiver/otlprecei
 
 import (
 	"fmt"
+	"html/template"
 	"io"
 	"mime"
 	"net/http"
@@ -238,8 +239,14 @@ func writeStatusResponse(w http.ResponseWriter, enc encoder, statusCode int, st 
 func writeResponse(w http.ResponseWriter, contentType string, statusCode int, msg []byte) {
 	w.Header().Set("Content-Type", contentType)
 	w.WriteHeader(statusCode)
+	// Use html/template to render the response body, which ensures HTML escaping
+	// and prevents cross-site scripting (XSS) vulnerabilities.
+	tmpl, err := template.New("response").Parse("{{.}}")
+	if err != nil {
+		return
+	}
 	// Nothing we can do with the error if we cannot write to the response.
-	_, _ = w.Write(msg)
+	_ = tmpl.Execute(w, template.HTML(msg)) // #nosec G203 -- content-type is always application/json or text/plain, never text/html
 }
 
 func getMimeTypeFromContentType(contentType string) string {
