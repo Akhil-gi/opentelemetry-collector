@@ -4,8 +4,10 @@ package exportertest // import "go.opentelemetry.io/collector/exporter/exportert
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/binary"
 	"fmt"
-	"math/rand/v2"
+	"math"
 	"sync"
 
 	"google.golang.org/grpc/codes"
@@ -24,10 +26,28 @@ var (
 	errPermanent    = status.Error(codes.Internal, "Permanent error")
 )
 
+// cryptoFloat32 returns a cryptographically random float32 in [0.0, 1.0).
+func cryptoFloat32() float32 {
+	var b [4]byte
+	if _, err := rand.Read(b[:]); err != nil {
+		panic(err)
+	}
+	return float32(binary.BigEndian.Uint32(b[:])) / float32(math.MaxUint32+1.0)
+}
+
+// cryptoFloat64 returns a cryptographically random float64 in [0.0, 1.0).
+func cryptoFloat64() float64 {
+	var b [8]byte
+	if _, err := rand.Read(b[:]); err != nil {
+		panic(err)
+	}
+	return float64(binary.BigEndian.Uint64(b[:])) / float64(math.MaxUint64+1.0)
+}
+
 // // randomNonPermanentErrorConsumeDecision is a decision function that succeeds approximately
 // // half of the time and fails with a non-permanent error the rest of the time.
 func randomNonPermanentErrorConsumeDecision() error {
-	if rand.Float32() < 0.5 {
+	if cryptoFloat32() < 0.5 {
 		return errNonPermanent
 	}
 	return nil
@@ -36,7 +56,7 @@ func randomNonPermanentErrorConsumeDecision() error {
 // randomPermanentErrorConsumeDecision is a decision function that succeeds approximately
 // half of the time and fails with a permanent error the rest of the time.
 func randomPermanentErrorConsumeDecision() error {
-	if rand.Float32() < 0.5 {
+	if cryptoFloat32() < 0.5 {
 		return consumererror.NewPermanent(errPermanent)
 	}
 	return nil
@@ -46,7 +66,7 @@ func randomPermanentErrorConsumeDecision() error {
 // a third of the time, fails with a permanent error the third of the time and fails with
 // a non-permanent error the rest of the time.
 func randomErrorsConsumeDecision() error {
-	r := rand.Float64()
+	r := cryptoFloat64()
 	third := 1.0 / 3.0
 	if r < third {
 		return consumererror.NewPermanent(errPermanent)
