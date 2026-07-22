@@ -17,7 +17,7 @@ import (
 	"slices"
 	"sort"
 	"strings"
-	"text/template"
+	"html/template"
 
 	"github.com/spf13/cobra"
 	"go.uber.org/multierr"
