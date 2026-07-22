@@ -66,6 +66,8 @@ spec:
           - "--config=/conf/otel-agent-config.yaml"
         image: otel/opentelemetry-collector:latest
         name: otel-agent
+        securityContext:
+          allowPrivilegeEscalation: false
         resources:
           limits:
             cpu: 500m
