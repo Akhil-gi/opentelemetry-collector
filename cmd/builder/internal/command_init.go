@@ -12,7 +12,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
-	"text/template"
+	"html/template"
 
 	"github.com/spf13/cobra"
 	"go.yaml.in/yaml/v3"
