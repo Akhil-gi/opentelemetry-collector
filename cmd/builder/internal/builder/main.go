@@ -12,7 +12,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
-	"text/template"
+	"html/template"
 	"time"
 
 	"go.uber.org/zap"
