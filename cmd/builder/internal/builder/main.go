@@ -37,7 +37,15 @@ func runGoCommand(cfg *Config, args ...string) ([]byte, error) {
 		cfg.Logger.Info("Running go subcommand.", zap.Any("arguments", args))
 	}
 
-	//nolint:gosec // #nosec G204 -- cfg.Distribution.Go is trusted to be a safe path and the caller is assumed to have carried out necessary input validation
+	// Validate that cfg.Distribution.Go is a non-empty absolute path before
+	// passing it to exec.Command. SetGoPath() resolves and validates this value
+	// via exec.LookPath, producing an absolute path. Enforcing that here
+	// prevents an unresolved or attacker-controlled value from reaching exec.Command.
+	if !filepath.IsAbs(cfg.Distribution.Go) {
+		return nil, fmt.Errorf("go binary path %q is not an absolute path: ensure SetGoPath() has been called to resolve and validate the executable", cfg.Distribution.Go)
+	}
+
+	//nolint:gosec // #nosec G204 -- cfg.Distribution.Go is validated as an absolute path resolved via exec.LookPath in SetGoPath()
 	cmd := exec.Command(cfg.Distribution.Go, args...)
 	cmd.Dir = cfg.Distribution.OutputPath
 
