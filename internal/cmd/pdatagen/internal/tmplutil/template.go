@@ -5,7 +5,7 @@ package tmplutil // import "go.opentelemetry.io/collector/internal/cmd/pdatagen/
 
 import (
 	"strings"
-	"text/template"
+	"html/template"
 
 	"github.com/ettle/strcase"
 )
