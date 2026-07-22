@@ -5,7 +5,7 @@ package builder // import "go.opentelemetry.io/collector/cmd/builder/internal/bu
 
 import (
 	_ "embed"
-	"text/template"
+	"html/template"
 )
 
 var (
