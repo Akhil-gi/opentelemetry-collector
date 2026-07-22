@@ -185,6 +185,8 @@ spec:
           - "--config=/conf/otel-collector-config.yaml"
         image: otel/opentelemetry-collector:latest
         name: otel-collector
+        securityContext:
+          allowPrivilegeEscalation: false
         resources:
           limits:
             cpu: 1
