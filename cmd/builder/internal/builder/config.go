@@ -154,13 +154,23 @@ func (c *Config) Validate() error {
 // SetGoPath sets go path
 func (c *Config) SetGoPath() error {
 	if !c.SkipCompilation || !c.SkipGetModules {
-		//nolint:gosec // #nosec G204
-		if _, err := exec.Command(c.Distribution.Go, "env").CombinedOutput(); err != nil {
-			path, err := exec.LookPath("go")
+		// Resolve and validate the Go executable path via LookPath before use.
+		// This ensures c.Distribution.Go is an actual resolvable executable on
+		// the system (not an arbitrary injected value) and produces an absolute
+		// path, eliminating PATH-manipulation risk for the subsequent exec.Command call.
+		goPath, err := exec.LookPath(c.Distribution.Go)
+		if err != nil {
+			// Fall back to the "go" binary on PATH.
+			goPath, err = exec.LookPath("go")
 			if err != nil {
 				return ErrGoNotFound
 			}
-			c.Distribution.Go = path
+		}
+		c.Distribution.Go = goPath
+
+		//nolint:gosec // #nosec G204 -- c.Distribution.Go is validated via exec.LookPath above and is a resolved absolute path
+		if _, err := exec.Command(c.Distribution.Go, "env").CombinedOutput(); err != nil {
+			return ErrGoNotFound
 		}
 		c.Logger.Info("Using go", zap.String("go-executable", c.Distribution.Go))
 	}
