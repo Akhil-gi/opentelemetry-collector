@@ -246,7 +246,7 @@ func writeResponse(w http.ResponseWriter, contentType string, statusCode int, ms
 		return
 	}
 	// Nothing we can do with the error if we cannot write to the response.
-	_ = tmpl.Execute(w, template.HTML(msg)) // #nosec G203 -- content-type is always application/json or text/plain, never text/html
+	_ = tmpl.Execute(w, string(msg))
 }
 
 func getMimeTypeFromContentType(contentType string) string {
