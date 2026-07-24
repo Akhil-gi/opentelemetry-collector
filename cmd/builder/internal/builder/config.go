@@ -169,6 +169,7 @@ func (c *Config) SetGoPath() error {
 		c.Distribution.Go = goPath
 
 		//nolint:gosec // #nosec G204 -- c.Distribution.Go is validated via exec.LookPath above and is a resolved absolute path
+		// nosemgrep: dangerous-exec-command -- c.Distribution.Go is resolved to an absolute path via exec.LookPath above; it is not an arbitrary user-supplied value
 		if _, err := exec.Command(c.Distribution.Go, "env").CombinedOutput(); err != nil {
 			return ErrGoNotFound
 		}
