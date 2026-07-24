@@ -69,6 +69,7 @@ func (fmp *provider) createClient() (*http.Client, error) {
 				TLSClientConfig: &tls.Config{
 					InsecureSkipVerify: fmp.insecureSkipVerify,
 					RootCAs:            pool,
+					MinVersion:         tls.VersionTLS13,
 				},
 			},
 		}, nil
