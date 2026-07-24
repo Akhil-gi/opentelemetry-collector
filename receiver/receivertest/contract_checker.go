@@ -5,10 +5,11 @@ package receivertest // import "go.opentelemetry.io/collector/receiver/receivert
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/binary"
 	"errors"
 	"fmt"
 	"maps"
-	"math/rand/v2"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -275,10 +276,20 @@ var (
 	errPermanent    = errors.New("permanent error")
 )
 
+// cryptoRandFloat64 returns a cryptographically random float64 in [0.0, 1.0).
+func cryptoRandFloat64() float64 {
+	var buf [8]byte
+	if _, err := rand.Read(buf[:]); err != nil {
+		panic(fmt.Sprintf("crypto/rand read failed: %v", err))
+	}
+	// Use the top 53 bits of the random uint64 to form a float64 in [0.0, 1.0).
+	return float64(binary.BigEndian.Uint64(buf[:])>>11) / (1 << 53)
+}
+
 // randomNonPermanentErrorConsumeDecision is a decision function that succeeds approximately
 // half of the time and fails with a non-permanent error the rest of the time.
 func randomNonPermanentErrorConsumeDecision(idSet) error {
-	if rand.Float32() < 0.5 {
+	if cryptoRandFloat64() < 0.5 {
 		return errNonPermanent
 	}
 	return nil
@@ -287,7 +298,7 @@ func randomNonPermanentErrorConsumeDecision(idSet) error {
 // randomPermanentErrorConsumeDecision is a decision function that succeeds approximately
 // half of the time and fails with a permanent error the rest of the time.
 func randomPermanentErrorConsumeDecision(idSet) error {
-	if rand.Float32() < 0.5 {
+	if cryptoRandFloat64() < 0.5 {
 		return consumererror.NewPermanent(errPermanent)
 	}
 	return nil
@@ -297,7 +308,7 @@ func randomPermanentErrorConsumeDecision(idSet) error {
 // a third of the time, fails with a permanent error the third of the time and fails with
 // a non-permanent error the rest of the time.
 func randomErrorsConsumeDecision(idSet) error {
-	r := rand.Float64()
+	r := cryptoRandFloat64()
 	third := 1.0 / 3.0
 	if r < third {
 		return consumererror.NewPermanent(errPermanent)
