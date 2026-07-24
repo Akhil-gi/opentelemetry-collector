@@ -45,7 +45,7 @@ func runGoCommand(cfg *Config, args ...string) ([]byte, error) {
 		return nil, fmt.Errorf("go binary path %q is not an absolute path: ensure SetGoPath() has been called to resolve and validate the executable", cfg.Distribution.Go)
 	}
 
-	//nolint:gosec // #nosec G204 -- cfg.Distribution.Go is validated as an absolute path resolved via exec.LookPath in SetGoPath()
+	//nolint:gosec // #nosec G204 -- cfg.Distribution.Go is validated as an absolute path resolved via exec.LookPath in SetGoPath() // nosemgrep: dangerous-exec-command
 	cmd := exec.Command(cfg.Distribution.Go, args...)
 	cmd.Dir = cfg.Distribution.OutputPath
 
